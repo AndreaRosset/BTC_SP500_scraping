@@ -12,7 +12,7 @@ driver2 = webdriver.Firefox(executable_path="./drivers/geckodriver")
 driver1.get(url1)
 driver2.get(url2)
 
-while 1 == 1:
+while True:
 
     content_element = driver1.find_element_by_id("last_last")
     content_html = content_element.get_attribute("innerHTML")
