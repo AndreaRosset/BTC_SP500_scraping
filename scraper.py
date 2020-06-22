@@ -1,19 +1,28 @@
 from selenium import webdriver
 from bs4 import BeautifulSoup
-from pathlib import Path
+from selenium.webdriver.chrome.options import Options
+import threading
+import json
 import time
 
-url1 = "https://www.investing.com/indices/investing.com-btc-usd"
-url2 = "https://www.investing.com/indices/us-spx-500"
+#firefox_driver = "./drivers/geckodriver"
+chrome_driver = "./drivers/chromedriver"
 
+url_btc_usd = "https://www.investing.com/indices/investing.com-btc-usd"
+url_SP500 = "https://www.investing.com/indices/us-spx-500"
 
-driver1 = webdriver.Firefox(executable_path="./drivers/geckodriver")
-driver2 = webdriver.Firefox(executable_path="./drivers/geckodriver")
-driver1.get(url1)
-driver2.get(url2)
+chrome_options = Options()
+chrome_options.add_argument("--headless")
+chrome_options.add_argument("--no-sandbox");
 
-while True:
+driver1 = webdriver.Chrome(executable_path=chrome_driver, options=chrome_options)
+driver2 = webdriver.Chrome(executable_path=chrome_driver, options=chrome_options)
+driver1.get(url_btc_usd)
+driver2.get(url_SP500)
 
+def get_element_value():
+    threading.Timer(0.5, get_element_value).start()
+    
     content_element = driver1.find_element_by_id("last_last")
     content_html = content_element.get_attribute("innerHTML")
     soup1 = BeautifulSoup(content_html, "html.parser")
@@ -22,8 +31,14 @@ while True:
     content_html = content_element.get_attribute("innerHTML")
     soup2 = BeautifulSoup(content_html, "html.parser")
 
+    new_data_entry = { 
+        "timestamp":time.time(), 
+        "BTC_value": str(soup1), 
+        "SP500_value": str(soup2)
+    }
     
+    new_data_entry = json.dumps(new_data_entry)
     
-
-    print(soup1)
-    print(soup2)
+    print(new_data_entry)
+    
+get_element_value()
