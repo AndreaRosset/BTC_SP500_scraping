@@ -1,19 +1,26 @@
 from selenium import webdriver
 from bs4 import BeautifulSoup
 from selenium.webdriver.chrome.options import Options
-import pika
+#import pika
+import redis
 import threading
 import json
 import time
+import re
 
 chrome_driver = "./drivers/chromedriver"
-rabbitMQ = "localhost"
+#rabbitMQ = "localhost"
+redis_ip = "localhost"
+redis_port = 6379
+index_list = "BTC"
 
 url_btc_usd = "https://www.investing.com/indices/investing.com-btc-usd"
 
-connection = pika.BlockingConnection(pika.ConnectionParameters(rabbitMQ))
-BTC_channel = connection.channel()
-BTC_channel.queue_declare(queue='BTC')
+#connection = pika.BlockingConnection(pika.ConnectionParameters(rabbitMQ))
+#BTC_channel = connection.channel()
+#BTC_channel.queue_declare(queue='BTC')
+
+r = redis.Redis(host=redis_ip, port=redis_port)
 
 chrome_options = Options()
 chrome_options.add_argument("--headless")
@@ -29,16 +36,18 @@ def get_btc_value():
     content_element = driver.find_element_by_id("last_last")
     content_html = content_element.get_attribute("innerHTML")
     soup = BeautifulSoup(content_html, "html.parser")
-
+    
     new_data_entry = { 
         "timestamp":time.time(), 
-        "BTC_value": str(soup)
+        "BTC_value": float(re.sub(r',', '', str(soup)))
     }
     
-    new_data_entry = json.dumps(new_data_entry)
+    new_data_entry = json.dumps(new_data_entry) 
     
-    BTC_channel.basic_publish(exchange='',
-                      routing_key='BTC',
-                      body=new_data_entry)
+    r.rpush(index_list, new_data_entry)
+    
+#    BTC_channel.basic_publish(exchange='',
+#                      routing_key='BTC',
+#                      body=new_data_entry)
     
 get_btc_value()
