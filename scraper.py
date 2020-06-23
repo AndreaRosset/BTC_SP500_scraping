@@ -8,18 +8,18 @@ import time
 
 #firefox_driver = "./drivers/geckodriver"
 chrome_driver = "./drivers/chromedriver"
-rabbitMQ = 'localhost'
+rabbitMQ = "localhost"
 
 url_btc_usd = "https://www.investing.com/indices/investing.com-btc-usd"
 url_SP500 = "https://www.investing.com/indices/us-spx-500"
 
 connection = pika.BlockingConnection(pika.ConnectionParameters(rabbitMQ))
 channel = connection.channel()
-BTC_channel = connection.channel()
-SP500_channel = connection.channel()
+#BTC_channel = connection.channel()
+#SP500_channel = connection.channel()
 channel.queue_declare(queue='BTC+SP500')
-BTC_channel.queue_declare(queue='BTC')
-SP500_channel.queue_declare(queue='SP500')
+#BTC_channel.queue_declare(queue='BTC')
+#SP500_channel.queue_declare(queue='SP500')
 
 chrome_options = Options()
 chrome_options.add_argument("--headless")
